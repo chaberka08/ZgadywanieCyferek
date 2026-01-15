@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zgadywanie Cyferek</title>
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      background: linear-gradient(135deg, #1a001a, #000000);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #f8c8dc;
+      user-select: none;
+    }
+
+    header h1 {
+      margin-top: 30px;
+      font-size: 40px;
+      letter-spacing: 2px;
+      font-weight: 700;
+      text-align: center;
+      color: #ff77b6;
+    }
+
+    .losowe {
+      display: flex;
+      width: 90%;
+      max-width: 700px;
+      justify-content: space-between;
+      padding: 20px;
+      background: #220022;
+      border-radius: 15px;
+    }
+
+    /* Ukrycie liczb - można je zaznaczyć ale niewidoczne */
+    .cyfra {
+      width: 22%;
+      height: 140px;
+      font-size: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      background: #330033;
+      color: transparent; /* ukryte */
+      text-shadow: none; /* bez cienia */
+      position: relative;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    /* X na błędnej cyfrze */
+    .cyfra.show-x::after {
+      content: "✖";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(50, 0, 50, 0.85);
+      color: #ff4a8e;
+      font-size: 110px;
+      font-weight: 900;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .zgadywane h3 {
+      margin: 0 0 10px 0;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      color: #ff7fbf;
+    }
+
+    .zgadywane .inputy {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .zgadywane input[type="number"] {
+      width: 60px;
+      height: 60px;
+      text-align: center;
+      font-size: 28px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: #330033;
+      color: #ff77b6;
+      font-weight: 700;
+      user-select: text;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .zgadywane input[type="number"]:focus {
+      background: #ff77b6;
+      color: #330033;
+    }
+
+    /* Przyciski w jednym stylu */
+    input[type="button"] {
+      padding: 12px 28px;
+      font-size: 16px;
+      border-radius: 25px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff4a8e, #ff77b6);
+      color: white;
+      letter-spacing: 1.1px;
+      font-weight: 700;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    input[type="button"]:hover {
+      background: linear-gradient(135deg, #ff77b6, #ff4a8e);
+    }
+
+    /* Specjalny styl dla przycisku losujLiczby */
+    input[type="button"].losuj-btn {
+      margin: 0 auto;
+      display: block;
+      padding: 20px;
+      width: auto;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      box-shadow: 0 6px 12px rgba(255, 74, 142, 0.6);
+      text-transform: uppercase;
+    }
+
+    /* Proby ułożone w grid 4 kolumn */
+    .proby {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      width: 90%;
+      max-width: 700px;
+      padding: 15px;
+      background: #220022;
+      border-radius: 15px;
+    }
+
+    .proby div {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      border-radius: 12px;
+      background: #330033;
+      color: #ff77b6;
+      font-weight: 700;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .proby div:hover {
+      background: #ff77b6;
+      color: #330033;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Zgadnij liczbę</h1>
+  </header>
+
+  <section class="losowe">
+    <div class="cyfra jeden" id="a"></div>
+    <div class="cyfra dwa" id="b"></div>
+    <div class="cyfra trzy" id="c"></div>
+    <div class="cyfra cztery" id="d"></div>
+  </section>
+
+  <input type="button" class="losuj-btn" onclick="losujLiczby()" value="Losuj liczby" />
+
+  <section class="zgadywane">
+    <h3>Tutaj wpisuj</h3>
+    <div class="inputy">
+      <input type="number" name="one" id="one" min="0" max="9" />
+      <input type="number" name="two" id="two" min="0" max="9" />
+      <input type="number" name="three" id="three" min="0" max="9" />
+      <input type="number" name="four" id="four" min="0" max="9" />
+      <input type="button" value="Zgaduj" onclick="zgaduj()" />
+    </div>
+  </section>
+
+  <section class="proby" id="proby"></section>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    function wybuchConfetti() {
+      confetti({
+        particleCount: 200,
+        spread: 120,
+        origin: { y: 0.6 },
+      });
+    }
+
+    function losujLiczby() {
+      let a = document.getElementById("a");
+      let b = document.getElementById("b");
+      let c = document.getElementById("c");
+      let d = document.getElementById("d");
+
+      let random_a = Math.floor(Math.random() * 10);
+      let random_b = Math.floor(Math.random() * 10);
+      let random_c = Math.floor(Math.random() * 10);
+      let random_d = Math.floor(Math.random() * 10);
+
+      a.textContent = random_a;
+      b.textContent = random_b;
+      c.textContent = random_c;
+      d.textContent = random_d;
+    }
+
+    function NowyDiv(tekst) {
+      let sekcja = document.getElementById("proby");
+      let div = document.createElement("div");
+      div.innerText = tekst;
+      sekcja.appendChild(div);
+    }
+
+    function sprawdzanie(x, y) {
+      let los = parseInt(x.innerText);
+      if (los == y) {
+        x.style.color = "white";
+        NowyDiv(y);
+      } else {
+        x.classList.add("show-x");
+        setTimeout(() => {
+          x.classList.remove("show-x");
+        }, 2000);
+        NowyDiv(y);
+      }
+    }
+
+    function zgaduj() {
+      let a = document.getElementById("a");
+      let b = document.getElementById("b");
+      let c = document.getElementById("c");
+      let d = document.getElementById("d");
+
+      let one = parseInt(document.getElementById("one").value);
+      let two = parseInt(document.getElementById("two").value);
+      let three = parseInt(document.getElementById("three").value);
+      let four = parseInt(document.getElementById("four").value);
+
+      if (isNaN(one) || isNaN(two) || isNaN(three) || isNaN(four)) {
+        alert("Musisz wpisać wartości we wszystkich polach!");
+        return;
+      }
+
+      let trafione = 0;
+
+      if (parseInt(a.innerText) == one) trafione++;
+      if (parseInt(b.innerText) == two) trafione++;
+      if (parseInt(c.innerText) == three) trafione++;
+      if (parseInt(d.innerText) == four) trafione++;
+
+      sprawdzanie(a, one);
+      sprawdzanie(b, two);
+      sprawdzanie(c, three);
+      sprawdzanie(d, four);
+
+      if (trafione === 4) {
+        wybuchConfetti();
+      }
+    }
+  </script>
+</body>
+</html>
